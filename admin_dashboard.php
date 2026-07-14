@@ -105,7 +105,6 @@ $unreadAnnouncements = $countRow['total'];
 
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="styles.css">
 
     <style>
 
@@ -7109,6 +7108,97 @@ function closeNewMessage(){
         document.getElementById("chatPanel").style.right = "380px";
     }
 }
+
+/*====================================================
+    CHART POPUP FUNCTIONS
+====================================================*/
+
+let currentChartView = "month";
+let axisInterval = 1;
+let showGridLines = true;
+let showDots = true;
+
+function openChartPopup()
+{
+    const popup = document.getElementById("chartPopup");
+
+    if(!popup) return;
+
+    popup.style.display = "flex";
+
+    loadExpandedChart();
+}
+
+function closeChartPopup()
+{
+    const popup = document.getElementById("chartPopup");
+
+    if(!popup) return;
+
+    popup.style.display = "none";
+}
+
+function setChartView(view)
+{
+    currentChartView = view;
+
+    loadChart();
+
+    if(document.getElementById("chartPopup").style.display === "flex")
+    {
+        loadExpandedChart();
+    }
+}
+
+function setAxisInterval(interval)
+{
+    axisInterval = parseInt(interval);
+
+    loadChart();
+
+    if(document.getElementById("chartPopup").style.display === "flex")
+    {
+        loadExpandedChart();
+    }
+}
+
+function setChartOption(option)
+{
+    switch(option)
+    {
+        case "grid":
+            showGridLines = !showGridLines;
+            break;
+
+        case "dots":
+            showDots = !showDots;
+            break;
+    }
+
+    loadChart();
+
+    if(document.getElementById("chartPopup").style.display === "flex")
+    {
+        loadExpandedChart();
+    }
+}
+
+function loadChart()
+{
+    if(typeof loadChartInto === "function")
+    {
+        loadChartInto("dashboardChart");
+    }
+}
+
+function loadExpandedChart()
+{
+    if(typeof loadChartInto === "function")
+    {
+        loadChartInto("expandedChart");
+    }
+}
+
 let activeUser = 0;
 
 function loadMessages(userId)
@@ -7470,6 +7560,19 @@ document.addEventListener('click', function(e){
 </script>
 
 <script>
+function loadChart() {
+    fetch("chart_data.php")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("chartBox").innerHTML = html;
+        });
+}
+
+loadChart();
+setInterval(loadChart, 1000);
+</script>
+
+<script>
 
 function openDiptankPopup(){
 
@@ -7609,37 +7712,6 @@ function refreshConversations()
     });
 }
 
-function updateUnreadBadge()
-{
-    fetch("get_unread_count.php")
-    .then(response => response.text())
-    .then(count => {
-
-        const badge =
-            document.getElementById(
-                "unreadMessagesBadge"
-            );
-
-        if(!badge)
-        {
-            return;
-        }
-
-        count = parseInt(count);
-
-        if(count > 0)
-        {
-            badge.innerText = count;
-            badge.style.display = "flex";
-        }
-        else
-        {
-            badge.style.display = "none";
-        }
-
-    });
-}
-
 function updateUnreadMessages() {fetch("get_unread_count.php")
         .then(res => res.text())
         .then(count => {
@@ -7696,9 +7768,6 @@ function closeNotifications(){
 
 }
 
-function closeUsersPopup() {
-    document.getElementById('usersPopup').style.display = 'none';
-}
 </script>
 
 
@@ -7997,26 +8066,26 @@ function filterDamID(value)
 
 }
 
-document
-.getElementById("damSearch")
-.addEventListener("input",function(){
+const damSearch = document.getElementById("damSearch");
 
-    let v =
-    this.value.replace(/\D/g,"");
+if (damSearch) {
 
-    if(v.length > 3){
+    damSearch.addEventListener("input", function () {
 
-        v =
-        v.substring(0,3)
-        + "-"
-        + v.substring(3,7);
+        let v = this.value.replace(/\D/g, "");
 
-    }
+        if (v.length > 3) {
+            v =
+                v.substring(0, 3) +
+                "-" +
+                v.substring(3, 7);
+        }
 
-    this.value = v;
+        this.value = v;
 
-});
+    });
 
+}
 </script>
 </body>
 </html>
